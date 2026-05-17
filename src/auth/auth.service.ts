@@ -59,7 +59,10 @@ export class AuthService {
 		})
 
 		// если такой email существует, выводим ответ с описанием ошибки
-		if (oldUser) throw new BadRequestException('User already exists')
+		if (oldUser)
+			throw new BadRequestException(
+				'User with this email or name already exists'
+			)
 
 		// создаем нового юзера
 		const user = await this.prisma.user.create({
@@ -106,12 +109,13 @@ export class AuthService {
 				email: dto.email
 			}
 		})
-		if (!user) throw new NotFoundException('User not found') // если юзера нет в бд - выводим ошибку
+		if (!user) throw new NotFoundException('validateUser error: User not found') // если юзера нет в бд - выводим ошибку
 
 		// проверка на валидность пароля
 		const isValid = await verify(user.password, dto.password)
 
-		if (!isValid) throw new UnauthorizedException('Invalid password') // если пароль неверный - выводим ошибку
+		if (!isValid)
+			throw new UnauthorizedException('validateUser error:  Invalid password') // если пароль неверный - выводим ошибку
 
 		return user
 	}
